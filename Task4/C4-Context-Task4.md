@@ -1,32 +1,30 @@
-
-# C4 — Диаграмма контекста (Task 4 — Передача ставок)
+# C4 — Диаграмма контекста (Task 4 — Передача ставок в кол-центры)
 
 ```puml
 @startuml
 !include ../../c4/C4_Context.puml
 LAYOUT_WITH_LEGEND()
 
-title Банк «Стандарт» — Контекст (Task 4: Ставки для кол-центров)
+title Банк «Стандарт» — Контекст (Task4: UC1–UC4)
 
-Person(Client, "Клиент", "Получает консультации")
-Person(CCAgent, "Оператор кол-центра", "Консультирует по ставкам")
-Person(PartnerAgent, "Оператор партнёрского КЦ", "Консультирует по ставкам")
-Person(BackOfficeDep, "Бэк-офис депозитов", "Поддерживает ставки в АБС")
+Person(CCAgent, "Менеджер кол-центра", "UC1: просматривает ставки")
+Person(PartnerAgent, "Оператор партнёрского КЦ", "UC2/UC4: работает со ставками по файлу")
+Person(BackOfficeDep, "Менеджер бэк-офиса", "UC3: обновляет ставки")
 
-System(InternetBank, "Интернет-банк", "Витрина депозитов")
-System(CallCenter, "Система кол-центра (банк)", "Рабочие места операторов")
-System(PartnerCC, "Система партнёрского КЦ", "Внешняя система партнёра")
-System(RatesService, "Сервис ставок (витрина)", "MS SQL + API/Export")
-System(ABS, "АБС", "Источник данных ставок")
+System(RatesSystem, "Единая система ставок", "Хранение и поддержка ставок")
+System(CallCenter, "Система кол-центра банка", "UI операторов")
+System(PartnerCC, "Система партнёрского КЦ", "Импорт файла ставок")
+System(SFTP, "SFTP-сервер", "Передача файлов ставок")
 
-Rel(BackOfficeDep, ABS, "Обновляет ставки", "UI АБС")
-Rel(ABS, RatesService, "Загрузка ставок (регламентно)", "ETL/процедуры")
-Rel(InternetBank, RatesService, "Чтение актуальных ставок", "HTTPS/TLS")
-Rel(CallCenter, RatesService, "Чтение актуальных ставок", "HTTPS/TLS")
-Rel(RatesService, PartnerCC, "Экспорт файлов ставок", "SFTP/CSV|XLSX")
+' UC1: просмотр ставок (онлайн)
+Rel(CCAgent, CallCenter, "UC1", "Работа в UI")
+Rel(CallCenter, RatesSystem, "Запрос ставок", "HTTPS/TLS")
 
-Rel(Client, CCAgent, "Консультация", "Телефон")
-Rel(Client, PartnerAgent, "Консультация", "Телефон")
+' UC3: обновление ставок
+Rel(BackOfficeDep, RatesSystem, "UC3: редактирование ставок", "HTTPS/TLS")
+
+' UC2: выгрузка файла партнёру
+Rel(RatesSystem, SFTP, "UC2: генерация файла", "Автоматически, 1 раз/сутки")
+Rel(PartnerCC, SFTP, "UC2/UC4: скачивание файла", "SFTP")
 
 @enduml
-```
