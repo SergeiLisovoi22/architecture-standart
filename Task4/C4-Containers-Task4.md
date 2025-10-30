@@ -8,7 +8,7 @@
 
 ```puml
 @startuml
-!include ../../c4/C4_Container.puml
+!include ../c4/C4_Container.puml
 LAYOUT_WITH_LEGEND()
 
 title Банк «Стандарт» — Контейнеры (Task4: UC1–UC4)

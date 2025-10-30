@@ -3,7 +3,7 @@
 
 ```puml
 @startuml
-!include ../../c4/C4_Container.puml
+!include ../c4/C4_Container.puml
 LAYOUT_WITH_LEGEND()
 top to bottom direction
 

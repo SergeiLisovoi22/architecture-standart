@@ -3,7 +3,7 @@
 
 ```puml
 @startuml
-!include ../../c4/C4_Context.puml
+!include ../c4/C4_Context.puml
 LAYOUT_WITH_LEGEND()
 
 title Банк «Стандарт» — Контекст (Task 3: UC1–UC7, согласно новой ADR)

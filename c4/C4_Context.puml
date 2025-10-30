@@ -1,0 +1,23 @@
+
+' Minimal local C4 Context macros (stub)
+' Place this file at: <repo-root>/c4/C4_Context.puml
+
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam NodeBorderColor #666666
+skinparam RectangleBorderColor #666666
+skinparam ActorBorderColor #333333
+skinparam DatabaseBorderColor #666666
+
+!define LAYOUT_WITH_LEGEND()
+
+' ==== Elements ====
+!define Person($alias, $label, $descr="") actor $alias as "$label" <<Person>>
+!define System($alias, $label, $descr="") rectangle $alias as "$label" <<System>>
+!define System_Ext($alias, $label, $descr="") rectangle $alias as "$label" <<External System>>
+!define System_Boundary($alias, $label) package "$label" as $alias {
+
+' ==== Relationships ====
+!define Rel($a, $b, $label="", $tech="") $a --> $b : $label\ n$tech
