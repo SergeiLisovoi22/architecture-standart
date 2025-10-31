@@ -1,61 +1,43 @@
-@startuml
-' ==== Минимальные стили/элементы (встроены) ====
-skinparam defaultTextAlignment center
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam ArrowColor #333333
-skinparam NodeBorderColor #666666
-skinparam RectangleBorderColor #666666
-skinparam ActorBorderColor #333333
-skinparam DatabaseBorderColor #666666
-skinparam ArrowThickness 1
+# C4 — Диаграмма контейнеров (Task 4 — Передача ставок в кол-центры)
 
-' Условные типы контейнеров
-' rectangle — Container, database — ContainerDb
+```plantuml
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
 
 title Банк «Стандарт» — Контейнеры (Task4: UC1–UC4) — «Передача ставок в кол-центр»
 
-' Персоны
-actor   CCAgent      as "Менеджер КЦ" <<Person>>
-actor   PartnerAgent as "Оператор партнёрского КЦ" <<Person>>
-actor   BackOffice   as "Бэк-офис" <<Person>>
+Person(CCAgent, "Менеджер КЦ")
+Person(PartnerAgent, "Оператор партнёрского КЦ")
+Person(BackOffice, "Бэк-офис")
 
-' Единая система ставок
-package "Единая система ставок" as RATES {
-rectangle Rates_API    as "Rates API\n<REST /.NET>"     <<Container>>
-database  Rates_DB     as "Rates DB\n<MS SQL>"          <<ContainerDb>>
-rectangle Rates_Export as "Export Module\n<Batch/Scheduler>" <<Container>>
+System_Boundary(RATES, "Единая система ставок") {
+  Container(Rates_API, "Rates API", "REST /.NET", "UC1/UC3: получение/обновление ставок")
+  ContainerDb(Rates_DB, "Rates DB", "MS SQL", "Хранение ставок")
+  Container(Rates_Export, "Export Module", "Batch/Scheduler", "UC2: выгрузка файла")
 }
 
-' Система кол-центра банка
-package "Система КЦ банка" as CC {
-rectangle CC_App  as "CC App\n<React>"         <<Container>>
-rectangle CC_API  as "CC Backend\n<Spring Boot>" <<Container>>
-database  CC_DB   as "CC DB\n<PostgreSQL>"     <<ContainerDb>>
+System_Boundary(CC, "Система КЦ банка") {
+  Container(CC_App, "CC App", "React", "UI оператора")
+  Container(CC_API, "CC Backend", "Spring Boot", "Запрос ставок")
+  ContainerDb(CC_DB, "CC DB", "PostgreSQL", "Кэш/справочники")
+  Rel(CC_App, CC_API, "HTTPS/TLS")
+  Rel(CC_API, CC_DB, "SQL")
+  Rel(CC_API, Rates_API, "UC1: GET /rates", "HTTPS/TLS")
 }
 
-' Партнёрский контур
-rectangle SFTP as "SFTP-сервер\n(хранилище файла ставок)" <<Container>>
-rectangle PartnerCC as "Система партнёрского КЦ\n<Импорт файла>" <<Container>>
+System(SFTP, "SFTP-сервер", "Хранение файла ставок")
+System(PartnerCC, "Система партнёрского КЦ", "Импорт файла ставок")
 
-' --- Связи по UC ---
+Rel(BackOffice, Rates_API, "UC3: CRUD ставок", "HTTPS/TLS")
+Rel(Rates_API, Rates_DB, "SQL")
 
-' UC3: бэк-офис обновляет ставки
-BackOffice --> Rates_API : UC3: CRUD ставок\nHTTPS/TLS
-Rates_API  --> Rates_DB  : SQL
-
-' UC1: КЦ банка читает ставки онлайн
-CCAgent  --> CC_App     : Работа оператора\nHTTPS/TLS
-CC_App   --> CC_API     : Запрос ставок\nHTTPS/TLS
-CC_API   --> Rates_API  : UC1: GET /rates\nHTTPS/TLS
-CC_API   --> CC_DB      : Кэш/справочники\nSQL
-
-' UC2: выгрузка файла партнёру (ежедневно, автоматически)
-Rates_Export --> Rates_DB : Чтение актуальных ставок\nSQL
-Rates_Export --> SFTP     : UC2: выкладка файла\nSFTP (защищённо)
-
-' UC4: подключение партнёрского КЦ
-PartnerCC --> SFTP       : Загрузка файла ставок\nSFTP
-PartnerAgent --> PartnerCC : Работа с загруженными ставками
+Rel(Rates_Export, Rates_DB, "Чтение актуальных ставок", "SQL")
+Rel(Rates_Export, SFTP, "UC2: выкладка файла", "SFTP")
+Rel(PartnerCC, SFTP, "UC2/UC4: скачивание файла", "SFTP")
+Rel(PartnerAgent, PartnerCC, "Работа с загруженными ставками", "")
 
 @enduml
+```

@@ -1,9 +1,13 @@
 site_name: Bank Documentation
-theme: readthedocs
+theme:
+  name: readthedocs
+
 markdown_extensions:
-  - md_in_html
   - plantuml_markdown:
-      server: "https://www.plantuml.com/plantuml"
+      server: https://www.plantuml.com/plantuml
+      format: svg
+  - md_in_html
+  - toc
+
 plugins:
-  - plantuml:
-      puml_url: https://www.plantuml.com/plantuml/
+  - search

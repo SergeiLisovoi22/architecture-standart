@@ -1,38 +1,29 @@
+# C4 — Диаграмма контекста (Task 4 — Передача ставок в кол-центры)
+
+```plantuml
 @startuml
-' ==== Минимальные стили/элементы (встроены) ====
-skinparam defaultTextAlignment center
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam ArrowColor #333333
-skinparam NodeBorderColor #666666
-skinparam RectangleBorderColor #666666
-skinparam ActorBorderColor #333333
-skinparam DatabaseBorderColor #666666
-skinparam ArrowThickness 1
-
-' Элементы (без внешних puml)
-' Персоны/системы
-actor   CCAgent      as "Менеджер кол-центра" <<Person>>
-actor   PartnerAgent as "Оператор партнёрского КЦ" <<Person>>
-actor   BackOffice   as "Менеджер бэк-офиса" <<Person>>
-
-rectangle RatesSystem  as "Единая система ставок\n(внутренняя система банка)" <<System>>
-rectangle CallCenter   as "Система кол-центра банка" <<System>>
-rectangle PartnerCC    as "Система партнёрского КЦ" <<System>>
-rectangle SFTP         as "SFTP-сервер (выгрузка файла ставок)" <<System>>
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
 
 title Банк «Стандарт» — Контекст (Task4: UC1–UC4) — «Передача ставок в кол-центр»
 
-' UC1: просмотр актуальных ставок (онлайн для КЦ банка)
-CCAgent --> CallCenter : UC1: работа в UI
-CallCenter --> RatesSystem : Запрос актуальных ставок\nHTTPS/TLS
+Person(CCAgent, "Менеджер кол-центра", "UC1: просматривает ставки")
+Person(PartnerAgent, "Оператор партнёрского КЦ", "UC2/UC4: работает со ставками из файла")
+Person(BackOffice, "Менеджер бэк-офиса", "UC3: обновляет ставки")
 
-' UC3: обновление ставок бэк-офисом
-BackOffice --> RatesSystem : UC3: редактирование ставок\nUI/API
+System(RatesSystem, "Единая система ставок", "Хранение и публикация ставок")
+System(CallCenter, "Система кол-центра банка", "UI операторов")
+System(PartnerCC, "Система партнёрского КЦ", "Импорт файла ставок")
+System(SFTP, "SFTP-сервер", "Передача файлов ставок")
 
-' UC2/UC4: партнёрский КЦ получает файл по SFTP
-RatesSystem --> SFTP : UC2: генерация файла ставок\n(автоматически, раз в сутки)
-PartnerCC --> SFTP : UC2/UC4: скачивание файла\nSFTP (защищённо)
-PartnerAgent --> PartnerCC : Работа с загруженными ставками
+Rel(CCAgent, CallCenter, "UC1: работа в UI", "HTTPS/TLS")
+Rel(CallCenter, RatesSystem, "Запрос актуальных ставок", "HTTPS/TLS")
+
+Rel(BackOffice, RatesSystem, "UC3: редактирование ставок", "HTTPS/TLS")
+
+Rel(RatesSystem, SFTP, "UC2: генерация файла ставок", "Автоматически, ежедневно")
+Rel(PartnerCC, SFTP, "UC2/UC4: скачивание файла", "SFTP")
 
 @enduml
+```
