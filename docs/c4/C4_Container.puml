@@ -1,0 +1,21 @@
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam NodeBorderColor #666666
+skinparam RectangleBorderColor #666666
+skinparam ActorBorderColor #333333
+skinparam DatabaseBorderColor #666666
+skinparam ArrowThickness 1
+
+!define LAYOUT_WITH_LEGEND()
+
+!define Person($alias, $label, $descr="") actor $alias as "$label" <<Person>>
+!define System($alias, $label, $descr="") rectangle $alias as "$label" <<System>>
+!define System_Ext($alias, $label, $descr="") rectangle $alias as "$label" <<External System>>
+!define System_Boundary($alias, $label) package "$label" as $alias {
+!define Container_Boundary($alias, $label) package "$label" as $alias {
+!define Container($alias, $label, $tech="", $descr="") rectangle $alias as "$label\n<$tech>" <<Container>>
+!define ContainerDb($alias, $label, $tech="", $descr="") database $alias as "$label\n<$tech>" <<ContainerDb>>
+!define Rel($a, $b, $label="", $tech="") $a --> $b : $label\ n$tech
+!define Rel_D($a, $b, $label="", $tech="") $a ..> $b : $label\ n$tech
